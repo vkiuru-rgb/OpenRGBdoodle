@@ -1,0 +1,42 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pip install *)",
+      "Bash(pip3 install *)",
+      "Bash(pip uninstall *)",
+      "Bash(pip3 uninstall *)",
+      "Bash(pip show *)",
+      "Bash(pip list*)",
+      "Bash(python *)",
+      "Bash(python3 *)",
+      "Bash(qmake *)",
+      "Bash(make *)",
+      "Bash(nmake *)",
+      "Bash(cmake *)",
+      "Bash(git *)",
+      "Bash(gh *)",
+      "Bash(curl * api.github.com*)",
+      "Bash(curl * gitlab.com*)",
+      "Read(Z:\\**)",
+      "Write(Z:\\**)",
+      "Read(/mnt/z/**)",
+      "Write(/mnt/z/**)",
+      "Read(Z:/**)",
+      "Write(Z:/**)"
+    ],
+    "deny": []
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c '\nSTAMP=\"${HOME}/.claude/github_scan.timestamp\"\nRESULTS=\"${HOME}/.claude/github_scan.md\"\nNOW=$(date +%s)\nLAST=$(cat \"$STAMP\" 2>/dev/null || echo 0)\n[ $((NOW - LAST)) -lt 86400 ] && exit 0\necho $NOW > \"$STAMP\"\n{\n  echo \"# GitHub Scan $(date +%Y-%m-%d)\"\n  echo \"\"\n  echo \"## OpenRGB Plugins & Tools\"\n  curl -s -H \"Accept: application/vnd.github+json\" \\\n    \"https://api.github.com/search/repositories?q=openrgb+plugin&sort=updated&per_page=5\" \\\n    | python3 -c \"import json,sys; items=json.load(sys.stdin).get(\\\"items\\\",[]); [print(\\\"- [\\\"+r[\\\"full_name\\\"]+\\\"](\\\"+r[\\\"html_url\\\"]+\\\") — \\\"+str(r.get(\\\"description\\\") or \\\"\\\")) for r in items]\"\n  echo \"\"\n  echo \"## 3DS Max RGB / Lighting\"\n  curl -s -H \"Accept: application/vnd.github+json\" \\\n    \"https://api.github.com/search/repositories?q=3dsmax+rgb+OR+3ds-max+lighting+OR+maxscript+rgb&sort=updated&per_page=5\" \\\n    | python3 -c \"import json,sys; items=json.load(sys.stdin).get(\\\"items\\\",[]); [print(\\\"- [\\\"+r[\\\"full_name\\\"]+\\\"](\\\"+r[\\\"html_url\\\"]+\\\") — \\\"+str(r.get(\\\"description\\\") or \\\"\\\")) for r in items]\"\n  echo \"\"\n  echo \"## Unreal Engine RGB / Peripheral Lighting\"\n  curl -s -H \"Accept: application/vnd.github+json\" \\\n    \"https://api.github.com/search/repositories?q=unreal+openrgb+OR+ue5+rgb+peripheral+OR+unreal+lighting+plugin&sort=updated&per_page=5\" \\\n    | python3 -c \"import json,sys; items=json.load(sys.stdin).get(\\\"items\\\",[]); [print(\\\"- [\\\"+r[\\\"full_name\\\"]+\\\"](\\\"+r[\\\"html_url\\\"]+\\\") — \\\"+str(r.get(\\\"description\\\") or \\\"\\\")) for r in items]\"\n  echo \"\"\n  echo \"## OpenRGB Python SDK Updates\"\n  curl -s -H \"Accept: application/vnd.github+json\" \\\n    \"https://api.github.com/search/repositories?q=openrgb+python&sort=updated&per_page=5\" \\\n    | python3 -c \"import json,sys; items=json.load(sys.stdin).get(\\\"items\\\",[]); [print(\\\"- [\\\"+r[\\\"full_name\\\"]+\\\"](\\\"+r[\\\"html_url\\\"]+\\\") — \\\"+str(r.get(\\\"description\\\") or \\\"\\\")) for r in items]\"\n} > \"$RESULTS\" 2>/dev/null\necho \"[Claude] Daily GitHub scan complete → ${RESULTS}\"\n'"
+          }
+        ]
+      }
+    ]
+  }
+}
