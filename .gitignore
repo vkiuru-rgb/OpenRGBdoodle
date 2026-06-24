@@ -9,6 +9,9 @@ OpenRGB-x86_64.AppImage
 debian/changelog
 fedora/OpenRGB.spec
 
+# Node
+node_modules/
+
 # Directories
 .build/
 .cache/
